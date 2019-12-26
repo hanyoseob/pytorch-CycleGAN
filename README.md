@@ -2,7 +2,7 @@
 
 ## Train
     >> python main.py --mode train --scope [scope name]
-
+ 
 * You have to set unique [scope name]
 
 ## Test
