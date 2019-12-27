@@ -94,7 +94,7 @@ class CNR2d(nn.Module):
 
 
 class DECNR2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=0.0):
+    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=0.0):
         super().__init__()
 
         if norm == 'bnorm':
@@ -102,7 +102,10 @@ class DECNR2d(nn.Module):
         else:
             bias = True
 
-        layers = [nn.ConvTranspose2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
+        layers = [nn.ConvTranspose2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)]
+        # layers = [nn.Upsample(scale_factor=stride, mode='bilinear'),
+        #           nn.ReflectionPad2d(int((kernel_size - 1)/2)),
+        #           nn.Conv2d(nch_in , nch_out, kernel_size=kernel_size, stride=1, padding=0, bias=bias)]
 
         if norm == 'bnorm':
             layers.append(nn.BatchNorm2d(nch_out))
@@ -136,6 +139,12 @@ class Deconv2d(nn.Module):
     def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1):
         super(Deconv2d, self).__init__()
         self.deconv = nn.ConvTranspose2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding)
+
+        # layers = [nn.Upsample(scale_factor=2, mode='bilinear'),
+        #           nn.ReflectionPad2d(1),
+        #           nn.Conv2d(nch_in , nch_out, kernel_size=3, stride=1, padding=0)]
+        #
+        # self.deconv = nn.Sequential(*layers)
 
     def forward(self, x):
         return self.deconv(x)

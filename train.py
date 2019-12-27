@@ -58,6 +58,8 @@ class Train:
         self.gpu_ids = args.gpu_ids
         self.num_freq = args.num_freq
 
+        self.direction = args.direction
+
         if self.gpu_ids and torch.cuda.is_available():
             self.device = torch.device("cuda:%d" % self.gpu_ids[0])
             torch.cuda.set_device(self.gpu_ids[0])
@@ -118,7 +120,7 @@ class Train:
     def train(self):
         mode = self.mode
 
-        dir_data_train = os.path.join(self.dir_data, 'monet2photo', 'train')
+        dir_data_train = os.path.join(self.dir_data, 'train')
         # dir_data_val = os.path.join(self.dir_data, 'monet2photo', 'val')
 
         log_dir_train = os.path.join(self.dir_log, self.scope, 'train')
@@ -147,7 +149,7 @@ class Train:
         norm = self.norm
 
         ## setup dataset
-        dataset_train = Dataset(dir_data_train, transform=self.preprocess)
+        dataset_train = Dataset(dir_data_train, direction=self.direction, data_type=self.data_type, transform=self.preprocess)
         # dataset_val = Dataset(dir_data_val, transform=transforms.Compose([Nomalize(), ToTensor()]))
 
         loader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=0)
@@ -244,19 +246,19 @@ class Train:
                 optimD.zero_grad()
 
                 # backward netD_a
-                pred_fake_b = netD_a(output_b.detach())
-                pred_real_b = netD_a(input_b)
+                pred_fake_a = netD_a(output_a.detach())
+                pred_real_a = netD_a(input_a)
 
-                loss_D_a_real = fn_GAN(pred_real_b, torch.ones_like(pred_real_b))
-                loss_D_a_fake = fn_GAN(pred_fake_b, torch.zeros_like(pred_fake_b))
+                loss_D_a_real = fn_GAN(pred_real_a, torch.ones_like(pred_real_a))
+                loss_D_a_fake = fn_GAN(pred_fake_a, torch.zeros_like(pred_fake_a))
                 loss_D_a = 0.5 * (loss_D_a_real + loss_D_a_fake)
 
                 # backward netD_b
-                pred_fake_a = netD_b(output_a.detach())
-                pred_real_a = netD_b(input_a)
+                pred_fake_b = netD_b(output_b.detach())
+                pred_real_b = netD_b(input_b)
 
-                loss_D_b_real = fn_GAN(pred_real_a, torch.ones_like(pred_real_a))
-                loss_D_b_fake = fn_GAN(pred_fake_a, torch.zeros_like(pred_fake_a))
+                loss_D_b_real = fn_GAN(pred_real_b, torch.ones_like(pred_real_b))
+                loss_D_b_fake = fn_GAN(pred_fake_b, torch.zeros_like(pred_fake_b))
                 loss_D_b = 0.5 * (loss_D_b_real + loss_D_b_fake)
 
                 # backward netD
@@ -278,8 +280,8 @@ class Train:
                     loss_I_a = 0
                     loss_I_b = 0
 
-                pred_fake_b = netD_a(output_b)
-                pred_fake_a = netD_b(output_a)
+                pred_fake_a = netD_a(output_a)
+                pred_fake_b = netD_b(output_b)
 
                 loss_G_a2b = fn_GAN(pred_fake_b, torch.ones_like(pred_fake_b))
                 loss_G_b2a = fn_GAN(pred_fake_a, torch.ones_like(pred_fake_a))
@@ -304,8 +306,9 @@ class Train:
                 loss_C_a_train += loss_C_a.item()
                 loss_C_b_train += loss_C_b.item()
 
-                loss_I_a_train += loss_I_a.item()
-                loss_I_b_train += loss_I_b.item()
+                if wgt_i > 0:
+                    loss_I_a_train += loss_I_a.item()
+                    loss_I_b_train += loss_I_b.item()
 
                 print('TRAIN: EPOCH %d: BATCH %04d/%04d: '
                       'G_a2b: %.4f G_b2a: %.4f D_a: %.4f D_b: %.4f C_a: %.4f C_b: %.4f I_a: %.4f I_b: %.4f'
@@ -425,7 +428,7 @@ class Train:
         if not os.path.exists(dir_result_save):
             os.makedirs(dir_result_save)
 
-        dir_data_test = os.path.join(self.dir_data, 'facades', 'test')
+        dir_data_test = os.path.join(self.dir_data, 'test')
 
         batch_size = 2
         device = self.device
@@ -436,9 +439,10 @@ class Train:
         nch_ker = self.nch_ker
 
         norm = self.norm
+        data_type = self.data_type
 
         ## setup dataset
-        dataset_test = Dataset(dir_data_test, transform=self.preprocess)
+        dataset_test = Dataset(dir_data_test, data_type=data_type, transform=self.preprocess)
 
         loader_test = torch.utils.data.DataLoader(dataset_test, batch_size=batch_size, shuffle=True, num_workers=0)
 
@@ -465,8 +469,8 @@ class Train:
 
             gen_loss_l1_test = 0
             for i, data in enumerate(loader_test, 1):
-                input = data['input'].to(device)
-                label = data['label'].to(device)
+                input = data['dataA'].to(device)
+                label = data['dataB'].to(device)
 
                 output = netG(input)
 

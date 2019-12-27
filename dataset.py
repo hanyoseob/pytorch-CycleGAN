@@ -12,10 +12,12 @@ class Dataset(torch.utils.data.Dataset):
        stuff<number>_density.pt
     """
 
-    def __init__(self, data_dir, index_slice=None, transform=None):
+    def __init__(self, data_dir, direction = 'A2B', data_type='float32', index_slice=None, transform=None):
         self.data_dir_a = data_dir + 'A'
         self.data_dir_b = data_dir + 'B'
         self.transform = transform
+        self.direction = direction
+        self.data_type = data_type
 
         dataA = [f for f in os.listdir(self.data_dir_a) if f.endswith('.jpg')]
         dataA.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
@@ -34,10 +36,24 @@ class Dataset(torch.utils.data.Dataset):
         # x = np.load(os.path.join(self.data_dir, self.names[0][index]))
         # y = np.load(os.path.join(self.data_dir, self.names[1][index]))
 
-        x = plt.imread(os.path.join(self.data_dir_a, self.names[0][index]))
-        y = plt.imread(os.path.join(self.data_dir_b, self.names[1][index]))
+        dataA = plt.imread(os.path.join(self.data_dir_a, self.names[0][index])).squeeze()
+        dataB = plt.imread(os.path.join(self.data_dir_b, self.names[1][index])).squeeze()
 
-        data = {'dataA': x, 'dataB': y}
+        if self.data_type == 'float32':
+            dataA = dataA.astype(np.float32)
+            dataB = dataB.astype(np.float32)
+
+        if len(dataA.shape) == 2:
+            dataA = np.expand_dims(dataA, axis=3)
+            dataA = np.tile(dataA, (1, 1, 3))
+        if len(dataB.shape) == 2:
+            dataB = np.expand_dims(dataB, axis=3)
+            dataB = np.tile(dataB, (1, 1, 3))
+
+        if self.direction == 'A2B':
+            data = {'dataA': dataA, 'dataB': dataB}
+        else:
+            data = {'dataA': dataB, 'dataB': dataA}
 
         if self.transform:
             data = self.transform(data)
@@ -61,6 +77,7 @@ class ToTensor(object):
         # return data
 
         dataA, dataB = data['dataA'], data['dataB']
+
         dataA = dataA.transpose((2, 0, 1)).astype(np.float32)
         dataB = dataB.transpose((2, 0, 1)).astype(np.float32)
         return {'dataA': torch.from_numpy(dataA), 'dataB': torch.from_numpy(dataB)}
@@ -95,9 +112,9 @@ class RandomFlip(object):
             dataA = np.fliplr(dataA)
             dataB = np.fliplr(dataB)
 
-        if np.random.rand() > 0.5:
-            dataA = np.flipud(dataA)
-            dataB = np.flipud(dataB)
+        # if np.random.rand() > 0.5:
+        #     dataA = np.flipud(dataA)
+        #     dataB = np.flipud(dataB)
 
         return {'dataA': dataA, 'dataB': dataB}
 

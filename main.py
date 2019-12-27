@@ -13,18 +13,18 @@ cudnn.fastest = True
 parser = argparse.ArgumentParser(description='Train the pix2pix network',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('--gpu_ids', default='-1', dest='gpu_ids')
+parser.add_argument('--gpu_ids', default='0', dest='gpu_ids')
 
 parser.add_argument('--mode', default='train', choices=['train', 'test'], dest='mode')
 parser.add_argument('--train_continue', default='off', choices=['on', 'off'], dest='train_continue')
 
-parser.add_argument('--scope', default='cyclegan_monet2photo_bnorm', dest='scope')
-parser.add_argument('--norm', type=str, default='bnorm', dest='norm')
+parser.add_argument('--scope', default='cyclegan_horse2zebra_inorm', dest='scope')
+parser.add_argument('--norm', type=str, default='inorm', dest='norm')
 
 parser.add_argument('--dir_checkpoint', default='./checkpoints', dest='dir_checkpoint')
 parser.add_argument('--dir_log', default='./log', dest='dir_log')
 
-parser.add_argument('--dir_data', default='./datasets', dest='dir_data')
+parser.add_argument('--dir_data', default='./datasets/horse2zebra', dest='dir_data')
 parser.add_argument('--dir_result', default='./result', dest='dir_result')
 
 parser.add_argument('--num_epoch', type=int,  default=300, dest='num_epoch')
@@ -40,9 +40,10 @@ parser.add_argument('--n_epochs', type=int, default=100, dest='n_epochs')
 parser.add_argument('--n_epochs_decay', type=int, default=100, dest='n_epochs_decay')
 parser.add_argument('--lr_decay_iters', type=int, default=50, dest='lr_decay_iters')
 
-parser.add_argument('--wgt_c_a', type=float, default=1e2, dest='wgt_c_a')
-parser.add_argument('--wgt_c_b', type=float, default=1e2, dest='wgt_c_b')
-parser.add_argument('--wgt_i', type=float, default=1e0, dest='wgt_i')
+parser.add_argument('--wgt_c_a', type=float, default=1e0, dest='wgt_c_a')
+parser.add_argument('--wgt_c_b', type=float, default=1e0, dest='wgt_c_b')
+parser.add_argument('--wgt_i', type=float, default=5e-1, dest='wgt_i')
+# parser.add_argument('--wgt_i', type=float, default=0e-1, dest='wgt_i')
 
 parser.add_argument('--optim', default='adam', choices=['sgd', 'adam', 'rmsprop'], dest='optim')
 parser.add_argument('--beta1', default=0.5, dest='beta1')
@@ -62,6 +63,7 @@ parser.add_argument('--nch_out', type=int, default=3, dest='nch_out')
 parser.add_argument('--nch_ker', type=int, default=64, dest='nch_ker')
 
 parser.add_argument('--data_type', default='float32', dest='data_type')
+parser.add_argument('--direction', default='A2B', dest='direction')
 
 PARSER = Parser(parser)
 

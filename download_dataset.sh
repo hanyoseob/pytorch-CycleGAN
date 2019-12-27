@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mkdir datasets
 #FILE=$1
 FILE="horse2zebra"
