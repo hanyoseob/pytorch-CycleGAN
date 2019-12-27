@@ -72,20 +72,17 @@ class CNR2d(nn.Module):
         else:
             bias = True
 
-        layers = [nn.Conv2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
+        layers = []
+        layers += [Conv2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
 
-        if norm == 'bnorm':
-            layers.append(nn.BatchNorm2d(nch_out))
-        elif norm == 'inorm':
-            layers.append(nn.InstanceNorm2d(nch_out))
+        if norm:
+            layers += [Norm2d(nch_out, norm)]
 
-        if relu != 0.0:
-            layers.append(nn.LeakyReLU(relu, True))
-        elif relu == 0.0:
-            layers.append(nn.ReLU(True))
+        if relu:
+            layers += [ReLU(relu)]
 
         if drop:
-            layers.append(nn.Dropout2d(drop))
+            layers += [nn.Dropout2d(drop)]
 
         self.cbr = nn.Sequential(*layers)
 
@@ -94,7 +91,7 @@ class CNR2d(nn.Module):
 
 
 class DECNR2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=0.0):
+    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=0.0):
         super().__init__()
 
         if norm == 'bnorm':
@@ -102,43 +99,68 @@ class DECNR2d(nn.Module):
         else:
             bias = True
 
-        layers = [nn.ConvTranspose2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)]
-        # layers = [nn.Upsample(scale_factor=stride, mode='bilinear'),
-        #           nn.ReflectionPad2d(int((kernel_size - 1)/2)),
-        #           nn.Conv2d(nch_in , nch_out, kernel_size=kernel_size, stride=1, padding=0, bias=bias)]
+        layers = []
+        layers += [Deconv2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
 
-        if norm == 'bnorm':
-            layers.append(nn.BatchNorm2d(nch_out))
-        elif norm == 'inorm':
-            layers.append(nn.InstanceNorm2d(nch_out))
+        if norm:
+            layers += [Norm2d(nch_out, norm)]
 
         if relu:
-            layers.append(nn.LeakyReLU(relu, True))
-        else:
-            layers.append(nn.ReLU(True))
+            layers += [ReLU(relu)]
 
         if drop:
-            layers.append(nn.Dropout2d(drop))
+            layers += [nn.Dropout2d(drop)]
 
-        self.cbr = nn.Sequential(*layers)
+        self.decbr = nn.Sequential(*layers)
 
     def forward(self, x):
-        return self.cbr(x)
+        return self.decbr(x)
+
+
+class ResBlock(nn.Module):
+    def __init__(self, nch_in, nch_out, kernel_size=3, stride=1, padding=1, padding_mode='reflection', norm='inorm', relu=0.0, drop=0.0):
+        super().__init__()
+
+        if norm == 'bnorm':
+            bias = False
+        else:
+            bias = True
+
+        layers = []
+
+        # 1st conv
+        layers += [Padding(padding, padding_mode=padding_mode)]
+        layers += [Conv2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=0, bias=bias),
+                   Norm2d(nch_out, norm),
+                   ReLU(relu)]
+
+        if drop:
+            layers += [nn.Dropout2d(drop)]
+
+        # 2nd conv
+        layers += [Padding(padding, padding_mode=padding_mode)]
+        layers += [Conv2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=0, bias=bias),
+                   Norm2d(nch_out, norm)]
+
+        self.resblk = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return x + self.resblk(x)
 
 
 class Conv2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1):
+    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1, bias=True):
         super(Conv2d, self).__init__()
-        self.conv = nn.Conv2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.conv = nn.Conv2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
 
     def forward(self, x):
         return self.conv(x)
 
 
 class Deconv2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1):
+    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1, bias=True):
         super(Deconv2d, self).__init__()
-        self.deconv = nn.ConvTranspose2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding)
+        self.deconv = nn.ConvTranspose2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)
 
         # layers = [nn.Upsample(scale_factor=2, mode='bilinear'),
         #           nn.ReflectionPad2d(1),
@@ -157,6 +179,46 @@ class Linear(nn.Module):
 
     def forward(self, x):
         return self.linear(x)
+
+
+class Norm2d(nn.Module):
+    def __init__(self, nch, norm_mode):
+        super(Norm2d, self).__init__()
+        if norm_mode == 'bnorm':
+            self.norm = nn.BatchNorm2d(nch)
+        elif norm_mode == 'inorm':
+            self.norm = nn.InstanceNorm2d(nch)
+
+    def forward(self, x):
+        return self.norm(x)
+
+
+class ReLU(nn.Module):
+    def __init__(self, relu):
+        super(ReLU, self).__init__()
+        if relu > 0:
+            self.relu = nn.LeakyReLU(relu, True)
+        elif relu == 0:
+            self.relu = nn.ReLU(True)
+
+    def forward(self, x):
+        return self.relu(x)
+
+
+class Padding(nn.Module):
+    def __init__(self, padding, padding_mode='zeros', value=0):
+        super(Padding, self).__init__()
+        if padding_mode == 'reflection':
+            self. padding = nn.ReflectionPad2d(padding)
+        elif padding_mode == 'replication':
+            self.padding = nn.ReplicationPad2d(padding)
+        elif padding_mode == 'constant':
+            self.padding = nn.ConstantPad2d(padding, value)
+        elif padding_mode == 'zeros':
+            self.padding = nn.ZeroPad2d(padding)
+
+    def forward(self, x):
+        return self.padding(x)
 
 
 class TV1dLoss(nn.Module):

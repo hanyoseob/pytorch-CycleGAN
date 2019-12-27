@@ -59,6 +59,90 @@ class UNet(nn.Module):
         return x
 
 
+class ResNet(nn.Module):
+    def __init__(self, nch_in, nch_out, nch_ker=64, norm='bnorm'):
+        super(ResNet, self).__init__()
+
+        self.nch_in = nch_in
+        self.nch_out = nch_out
+        self.nch_ker = nch_ker
+        self.norm = norm
+
+        if norm == 'bnorm':
+            self.bias = False
+        else:
+            self.bias = True
+
+        enc1 = [Padding(3, 'reflection'),
+                Conv2d(self.nch_in, self.nch_ker, kernel_size=7, stride=1, padding=0, bias=self.bias),
+                ReLU(0.0)]
+        self.enc1 = nn.Sequential(*enc1)
+
+        enc2 = [Conv2d(1 * self.nch_ker, 2 * self.nch_ker, kernel_size=3, stride=2, padding=1, bias=self.bias),
+                Norm2d(2 * self.nch_ker, norm_mode=norm),
+                ReLU(0.0)]
+        self.enc2 = nn.Sequential(*enc2)
+
+        enc3 = [Conv2d(2 * self.nch_ker, 4 * self.nch_ker, kernel_size=3, stride=2, padding=1, bias=self.bias),
+                Norm2d(4 * self.nch_ker, norm_mode=norm),
+                ReLU(0.0)]
+        self.enc3 = nn.Sequential(*enc3)
+
+        self. res1 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res2 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res3 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res4 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res5 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res6 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res7 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res8 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        self. res9 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
+                              stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
+
+        dec3 = [nn.ConvTranspose2d(4 * self.nch_ker, 2 * self.nch_ker, kernel_size=3, stride=2, padding=1, output_padding=1, bias=self.bias),
+                Norm2d(2 * self.nch_ker, norm_mode=norm),
+                ReLU(0.0)]
+        self.dec3 = nn.Sequential(*dec3)
+
+        dec2 = [nn.ConvTranspose2d(2 * self.nch_ker, 1 * self.nch_ker, kernel_size=3, stride=2, padding=1, output_padding=1, bias=self.bias),
+                Norm2d(1 * self.nch_ker, norm_mode=norm),
+                ReLU(0.0)]
+        self.dec2 = nn.Sequential(*dec2)
+
+        dec1 = [Padding(3, 'reflection'),
+                Conv2d(1 * self.nch_ker, self.nch_out, kernel_size=7, stride=1, padding=0, bias=self.bias)]
+        self.dec1 = nn.Sequential(*dec1)
+
+    def forward(self, x):
+        x = self.enc1(x)
+        x = self.enc2(x)
+        x = self.enc3(x)
+
+        x = self.dec3(x)
+        x = self.dec2(x)
+        x = self.dec1(x)
+
+        x = torch.tanh(x)
+
+        return x
+
+
 class Discriminator(nn.Module):
     def __init__(self, nch_in, nch_ker=64, norm='bnorm'):
         super(Discriminator, self).__init__()

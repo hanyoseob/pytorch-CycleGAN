@@ -13,7 +13,7 @@ cudnn.fastest = True
 parser = argparse.ArgumentParser(description='Train the pix2pix network',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('--gpu_ids', default='0', dest='gpu_ids')
+parser.add_argument('--gpu_ids', default='-1', dest='gpu_ids')
 
 parser.add_argument('--mode', default='train', choices=['train', 'test'], dest='mode')
 parser.add_argument('--train_continue', default='off', choices=['on', 'off'], dest='train_continue')
@@ -40,8 +40,8 @@ parser.add_argument('--n_epochs', type=int, default=100, dest='n_epochs')
 parser.add_argument('--n_epochs_decay', type=int, default=100, dest='n_epochs_decay')
 parser.add_argument('--lr_decay_iters', type=int, default=50, dest='lr_decay_iters')
 
-parser.add_argument('--wgt_c_a', type=float, default=1e0, dest='wgt_c_a')
-parser.add_argument('--wgt_c_b', type=float, default=1e0, dest='wgt_c_b')
+parser.add_argument('--wgt_c_a', type=float, default=1e1, dest='wgt_c_a')
+parser.add_argument('--wgt_c_b', type=float, default=1e1, dest='wgt_c_b')
 parser.add_argument('--wgt_i', type=float, default=5e-1, dest='wgt_i')
 # parser.add_argument('--wgt_i', type=float, default=0e-1, dest='wgt_i')
 

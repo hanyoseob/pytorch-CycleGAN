@@ -162,8 +162,11 @@ class Train:
         # num_batch_val = int((num_val / batch_size) + ((num_val % batch_size) != 0))
 
         ## setup network
-        netG_a2b = UNet(nch_in, nch_out, nch_ker, norm)
-        netG_b2a = UNet(nch_in, nch_out, nch_ker, norm)
+        # netG_a2b = UNet(nch_in, nch_out, nch_ker, norm)
+        # netG_b2a = UNet(nch_in, nch_out, nch_ker, norm)
+
+        netG_a2b = ResNet(nch_in, nch_out, nch_ker, norm)
+        netG_b2a = ResNet(nch_in, nch_out, nch_ker, norm)
 
         netD_a = Discriminator(nch_in, nch_ker, norm)
         netD_b = Discriminator(nch_in, nch_ker, norm)
