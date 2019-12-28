@@ -48,14 +48,25 @@ class Concat(nn.Module):
 
 
 class CNR1d(nn.Module):
-    def __init__(self, nch_in, nch_out, bnorm=True, brelu=True):
+    def __init__(self, nch_in, nch_out, norm='bnorm', relu=0.0, drop=[]):
         super().__init__()
 
-        layers = nn.Linear(nch_in, nch_out)
-        if bnorm:
-            layers.append(nn.InstanceNorm1d(nch_out))
-        if brelu:
-            layers.append(nn.LeakyReLU(brelu))
+        if norm == 'bnorm':
+            bias = False
+        else:
+            bias = True
+
+        layers = []
+        layers += [nn.Linear(nch_in, nch_out, bias=bias)]
+
+        if norm != []:
+            layers += [Norm2d(nch_out, norm)]
+
+        if relu != []:
+            layers += [ReLU(relu)]
+
+        if drop != []:
+            layers += [nn.Dropout2d(drop)]
 
         self.cbr = nn.Sequential(*layers)
 
@@ -64,7 +75,7 @@ class CNR1d(nn.Module):
 
 
 class CNR2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=0.0):
+    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=[]):
         super().__init__()
 
         if norm == 'bnorm':
@@ -91,7 +102,7 @@ class CNR2d(nn.Module):
 
 
 class DECNR2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=0.0):
+    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=[]):
         super().__init__()
 
         if norm == 'bnorm':
@@ -118,7 +129,7 @@ class DECNR2d(nn.Module):
 
 
 class ResBlock(nn.Module):
-    def __init__(self, nch_in, nch_out, kernel_size=3, stride=1, padding=1, padding_mode='reflection', norm='inorm', relu=0.0, drop=0.0):
+    def __init__(self, nch_in, nch_out, kernel_size=3, stride=1, padding=1, padding_mode='reflection', norm='inorm', relu=0.0, drop=[]):
         super().__init__()
 
         if norm == 'bnorm':
