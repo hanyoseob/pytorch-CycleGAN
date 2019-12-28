@@ -75,7 +75,7 @@ class CNR1d(nn.Module):
 
 
 class CNR2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=[]):
+    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=[]):
         super().__init__()
 
         if norm == 'bnorm':
@@ -84,7 +84,7 @@ class CNR2d(nn.Module):
             bias = True
 
         layers = []
-        layers += [Conv2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
+        layers += [Conv2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)]
 
         if norm != []:
             layers += [Norm2d(nch_out, norm)]
@@ -102,7 +102,7 @@ class CNR2d(nn.Module):
 
 
 class DECNR2d(nn.Module):
-    def __init__(self, nch_in, nch_out, kerner_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=[]):
+    def __init__(self, nch_in, nch_out, kernel_size=4, stride=1, padding=1, norm='bnorm', relu=0.0, drop=[]):
         super().__init__()
 
         if norm == 'bnorm':
@@ -111,7 +111,7 @@ class DECNR2d(nn.Module):
             bias = True
 
         layers = []
-        layers += [Deconv2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
+        layers += [Deconv2d(nch_in, nch_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias)]
 
         if norm != []:
             layers += [Norm2d(nch_out, norm)]
