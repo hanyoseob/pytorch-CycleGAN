@@ -75,13 +75,13 @@ class CNR2d(nn.Module):
         layers = []
         layers += [Conv2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
 
-        if norm:
+        if norm != []:
             layers += [Norm2d(nch_out, norm)]
 
-        if relu:
+        if relu != []:
             layers += [ReLU(relu)]
 
-        if drop:
+        if drop != []:
             layers += [nn.Dropout2d(drop)]
 
         self.cbr = nn.Sequential(*layers)
@@ -102,13 +102,13 @@ class DECNR2d(nn.Module):
         layers = []
         layers += [Deconv2d(nch_in, nch_out, kernel_size=kerner_size, stride=stride, padding=padding, bias=bias)]
 
-        if norm:
+        if norm != []:
             layers += [Norm2d(nch_out, norm)]
 
-        if relu:
+        if relu != []:
             layers += [ReLU(relu)]
 
-        if drop:
+        if drop != []:
             layers += [nn.Dropout2d(drop)]
 
         self.decbr = nn.Sequential(*layers)
@@ -134,7 +134,7 @@ class ResBlock(nn.Module):
                    Norm2d(nch_out, norm),
                    ReLU(relu)]
 
-        if drop:
+        if drop != []:
             layers += [nn.Dropout2d(drop)]
 
         # 2nd conv

@@ -59,6 +59,7 @@ class Train:
         self.num_freq = args.num_freq
 
         self.direction = args.direction
+        self.name_data = args.name_data
 
         if self.gpu_ids and torch.cuda.is_available():
             self.device = torch.device("cuda:%d" % self.gpu_ids[0])
@@ -120,12 +121,6 @@ class Train:
     def train(self):
         mode = self.mode
 
-        dir_data_train = os.path.join(self.dir_data, 'train')
-        # dir_data_val = os.path.join(self.dir_data, 'monet2photo', 'val')
-
-        log_dir_train = os.path.join(self.dir_log, self.scope, 'train')
-        # log_dir_val = os.path.join(self.dir_log, self.scope, 'val')
-
         train_continue = self.train_continue
         num_epoch = self.num_epoch
 
@@ -147,8 +142,15 @@ class Train:
 
         num_freq = self.num_freq
         norm = self.norm
+        name_data = self.name_data
 
         ## setup dataset
+        dir_data_train = os.path.join(self.dir_data, name_data, 'train')
+        # dir_data_val = os.path.join(self.dir_data, 'monet2photo', 'val')
+
+        log_dir_train = os.path.join(self.dir_log, self.scope, name_data, 'train')
+        # log_dir_val = os.path.join(self.dir_log, self.scope, 'val')
+
         dataset_train = Dataset(dir_data_train, direction=self.direction, data_type=self.data_type, transform=self.preprocess)
         # dataset_val = Dataset(dir_data_val, transform=transforms.Compose([Nomalize(), ToTensor()]))
 

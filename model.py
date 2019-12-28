@@ -6,7 +6,6 @@ import torch.nn.functional as F
 from torch.nn import init
 from torch.optim import lr_scheduler
 
-
 class UNet(nn.Module):
     def __init__(self, nch_in, nch_out, nch_ker=64, norm='bnorm'):
         super(UNet, self).__init__()

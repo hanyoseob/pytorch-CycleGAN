@@ -33,7 +33,7 @@ class Parser:
     def write_args(self):
         params_dict = vars(self.__args)
 
-        log_dir = os.path.join(params_dict['dir_log'], params_dict['scope'])
+        log_dir = os.path.join(params_dict['dir_log'], params_dict['scope'], params_dict['name_data'])
         args_name = os.path.join(log_dir, 'args.txt')
 
         if not os.path.exists(log_dir):
