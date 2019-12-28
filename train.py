@@ -154,7 +154,7 @@ class Train:
         dataset_train = Dataset(dir_data_train, direction=self.direction, data_type=self.data_type, transform=self.preprocess)
         # dataset_val = Dataset(dir_data_val, transform=transforms.Compose([Nomalize(), ToTensor()]))
 
-        loader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=0)
+        loader_train = torch.utils.data.DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=8)
         # loader_val = torch.utils.data.DataLoader(dataset_val, batch_size=batch_size, shuffle=False, num_workers=0)
 
         num_train = len(dataset_train)

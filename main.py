@@ -13,12 +13,12 @@ cudnn.fastest = True
 parser = argparse.ArgumentParser(description='Train the pix2pix network',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('--gpu_ids', default='-1', dest='gpu_ids')
+parser.add_argument('--gpu_ids', default='0', dest='gpu_ids')
 
 parser.add_argument('--mode', default='train', choices=['train', 'test'], dest='mode')
 parser.add_argument('--train_continue', default='off', choices=['on', 'off'], dest='train_continue')
 
-parser.add_argument('--scope', default='cyclegan_inorm', dest='scope')
+parser.add_argument('--scope', default='cyclegan_inorm_wo_ident', dest='scope')
 parser.add_argument('--norm', type=str, default='inorm', dest='norm')
 parser.add_argument('--name_data', type=str, default='horse2zebra', dest='name_data')
 
