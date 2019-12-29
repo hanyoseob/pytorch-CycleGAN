@@ -2,9 +2,9 @@ from layer import *
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.nn import init
 from torch.optim import lr_scheduler
+
 
 class UNet(nn.Module):
     def __init__(self, nch_in, nch_out, nch_ker=64, norm='bnorm'):
@@ -15,23 +15,28 @@ class UNet(nn.Module):
         self.nch_ker = nch_ker
         self.norm = norm
 
-        self.enc1 = CNR2d(1 * self.nch_in,  1 * self.nch_ker, stride=2, norm=[],        relu=0.2, drop=0.0)
-        self.enc2 = CNR2d(1 * self.nch_ker, 2 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.enc3 = CNR2d(2 * self.nch_ker, 4 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.enc4 = CNR2d(4 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.enc5 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.enc6 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.enc7 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.enc8 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.0)
+        if norm == 'bnorm':
+            self.bias = False
+        else:
+            self.bias = True
+
+        self.enc1 = CNR2d(1 * self.nch_in,  1 * self.nch_ker, stride=2, norm=[],        relu=0.2, drop=[], bias=False)
+        self.enc2 = CNR2d(1 * self.nch_ker, 2 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.enc3 = CNR2d(2 * self.nch_ker, 4 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.enc4 = CNR2d(4 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.enc5 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.enc6 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.enc7 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.enc8 = CNR2d(8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=[])
 
         self.dec8 = DECNR2d(1 * 8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.5)
         self.dec7 = DECNR2d(2 * 8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.5)
         self.dec6 = DECNR2d(2 * 8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.5)
-        self.dec5 = DECNR2d(2 * 8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.0)
-        self.dec4 = DECNR2d(2 * 8 * self.nch_ker, 4 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.0)
-        self.dec3 = DECNR2d(2 * 4 * self.nch_ker, 2 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.0)
-        self.dec2 = DECNR2d(2 * 2 * self.nch_ker, 1 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=0.0)
-        self.dec1 = Deconv2d(2 * 1 * self.nch_ker, 1 * self.nch_out, stride=2)
+        self.dec5 = DECNR2d(2 * 8 * self.nch_ker, 8 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=[])
+        self.dec4 = DECNR2d(2 * 8 * self.nch_ker, 4 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=[])
+        self.dec3 = DECNR2d(2 * 4 * self.nch_ker, 2 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=[])
+        self.dec2 = DECNR2d(2 * 2 * self.nch_ker, 1 * self.nch_ker, stride=2, norm=self.norm, relu=0.0, drop=[])
+        self.dec1 = Deconv2d(2 * 1 * self.nch_ker, 1 * self.nch_out, stride=2, bias=False)
 
     def forward(self, x):
 
@@ -58,6 +63,7 @@ class UNet(nn.Module):
         return x
 
 
+
 class ResNet(nn.Module):
     def __init__(self, nch_in, nch_out, nch_ker=64, norm='bnorm'):
         super(ResNet, self).__init__()
@@ -73,19 +79,12 @@ class ResNet(nn.Module):
             self.bias = True
 
         enc1 = [Padding(3, 'reflection'),
-                Conv2d(self.nch_in, self.nch_ker, kernel_size=7, stride=1, padding=0, bias=self.bias),
-                ReLU(0.0)]
+                CNR2d(self.nch_in, 1 * self.nch_ker, kernel_size=7, stride=1, padding=0, norm=[], relu=0.0, bias=False)]
         self.enc1 = nn.Sequential(*enc1)
 
-        enc2 = [Conv2d(1 * self.nch_ker, 2 * self.nch_ker, kernel_size=3, stride=2, padding=1, bias=self.bias),
-                Norm2d(2 * self.nch_ker, norm_mode=norm),
-                ReLU(0.0)]
-        self.enc2 = nn.Sequential(*enc2)
+        self.enc2 = CNR2d(1 * self.nch_ker, 2 * self.nch_ker, kernel_size=3, stride=2, padding=1, norm=self.norm, relu=0.0)
 
-        enc3 = [Conv2d(2 * self.nch_ker, 4 * self.nch_ker, kernel_size=3, stride=2, padding=1, bias=self.bias),
-                Norm2d(4 * self.nch_ker, norm_mode=norm),
-                ReLU(0.0)]
-        self.enc3 = nn.Sequential(*enc3)
+        self.enc3 = CNR2d(2 * self.nch_ker, 4 * self.nch_ker, kernel_size=3, stride=2, padding=1, norm=self.norm, relu=0.0)
 
         self. res1 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
                               stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
@@ -114,24 +113,28 @@ class ResNet(nn.Module):
         self. res9 = ResBlock(4 * self.nch_ker, 4 * self.nch_ker, kernel_size=3,
                               stride=1, norm=self.norm, padding=1, padding_mode='reflection', relu=0.0, drop=0.0)
 
-        dec3 = [nn.ConvTranspose2d(4 * self.nch_ker, 2 * self.nch_ker, kernel_size=3, stride=2, padding=1, output_padding=1, bias=self.bias),
-                Norm2d(2 * self.nch_ker, norm_mode=norm),
-                ReLU(0.0)]
-        self.dec3 = nn.Sequential(*dec3)
+        self.dec3 = DECNR2d(4 * self.nch_ker, 2 * self.nch_ker, kernel_size=3, stride=2, padding=1, output_padding=1, norm=self.norm, relu=0.0)
 
-        dec2 = [nn.ConvTranspose2d(2 * self.nch_ker, 1 * self.nch_ker, kernel_size=3, stride=2, padding=1, output_padding=1, bias=self.bias),
-                Norm2d(1 * self.nch_ker, norm_mode=norm),
-                ReLU(0.0)]
-        self.dec2 = nn.Sequential(*dec2)
+        self.dec2 = DECNR2d(2 * self.nch_ker, 1 * self.nch_ker, kernel_size=3, stride=2, padding=1, output_padding=1, norm=self.norm, relu=0.0)
 
         dec1 = [Padding(3, 'reflection'),
-                Conv2d(1 * self.nch_ker, self.nch_out, kernel_size=7, stride=1, padding=0, bias=self.bias)]
+                Conv2d(1 * self.nch_ker, self.nch_out, kernel_size=7, stride=1, padding=0, bias=False)]
         self.dec1 = nn.Sequential(*dec1)
 
     def forward(self, x):
         x = self.enc1(x)
         x = self.enc2(x)
         x = self.enc3(x)
+
+        x = self.res1(x)
+        x = self.res2(x)
+        x = self.res3(x)
+        x = self.res4(x)
+        x = self.res5(x)
+        x = self.res6(x)
+        x = self.res7(x)
+        x = self.res8(x)
+        x = self.res8(x)
 
         x = self.dec3(x)
         x = self.dec2(x)
@@ -150,11 +153,16 @@ class Discriminator(nn.Module):
         self.nch_ker = nch_ker
         self.norm = norm
 
-        self.dsc1 = CNR2d(1 * self.nch_in,  1 * self.nch_ker, stride=2, norm=[],      relu=0.2, drop=0.0)
-        self.dsc2 = CNR2d(1 * self.nch_ker, 2 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.dsc3 = CNR2d(2 * self.nch_ker, 4 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=0.0)
-        self.dsc4 = CNR2d(4 * self.nch_ker, 8 * self.nch_ker, stride=1, norm=self.norm, relu=0.2, drop=0.0)
-        self.dsc5 = Conv2d(8 * self.nch_ker, 1,               stride=1)
+        if norm == 'bnorm':
+            self.bias = False
+        else:
+            self.bias = True
+
+        self.dsc1 = CNR2d(1 * self.nch_in,  1 * self.nch_ker, stride=2, norm=[],        relu=0.2, drop=[], bias=False)
+        self.dsc2 = CNR2d(1 * self.nch_ker, 2 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.dsc3 = CNR2d(2 * self.nch_ker, 4 * self.nch_ker, stride=2, norm=self.norm, relu=0.2, drop=[])
+        self.dsc4 = CNR2d(4 * self.nch_ker, 8 * self.nch_ker, stride=1, norm=self.norm, relu=0.2, drop=[])
+        self.dsc5 = Conv2d(8 * self.nch_ker, 1,               stride=1, bias=False)
 
     def forward(self, x):
 
@@ -165,38 +173,6 @@ class Discriminator(nn.Module):
         x = self.dsc5(x)
 
         x = torch.sigmoid(x)
-
-        return x
-
-class AutoEncoder1d(nn.Module):
-    def __init__(self, nch_in, nch_out):
-        super(AutoEncoder1d, self).__init__()
-
-        # self.nch_in = args.nch_in
-        # self.nch_out = args.nch_out
-        self.nch_in = nch_in
-        self.nch_out = nch_out
-
-        self.efc1 = nn.Linear(self.nch_in, 400)
-        self.efc2 = nn.Linear(400, 200)
-        self.efc3 = nn.Linear(200, 100)
-        self.efc4 = nn.Linear(100, 50)
-
-        self.dfc4 = nn.Linear(50, 100)
-        self.dfc3 = nn.Linear(100, 200)
-        self.dfc2 = nn.Linear(200, 400)
-        self.dfc1 = nn.Linear(400, self.nch_out)
-
-    def forward(self, x):
-        x = F.relu(self.efc1(x))
-        x = F.relu(self.efc2(x))
-        x = F.relu(self.efc3(x))
-        x = F.relu(self.efc4(x))
-
-        x = F.relu(self.dfc4(x))
-        x = F.relu(self.dfc3(x))
-        x = F.relu(self.dfc2(x))
-        x = self.dfc1(x)
 
         return x
 

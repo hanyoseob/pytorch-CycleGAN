@@ -12,22 +12,19 @@ class Dataset(torch.utils.data.Dataset):
        stuff<number>_density.pt
     """
 
-    def __init__(self, data_dir, direction = 'A2B', data_type='float32', index_slice=None, transform=None):
+    def __init__(self, data_dir, direction='A2B', data_type='float32', nch=3, transform=[]):
         self.data_dir_a = data_dir + 'A'
         self.data_dir_b = data_dir + 'B'
         self.transform = transform
         self.direction = direction
         self.data_type = data_type
+        self.nch = nch
 
         dataA = [f for f in os.listdir(self.data_dir_a) if f.endswith('.jpg')]
         dataA.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
         dataB = [f for f in os.listdir(self.data_dir_b) if f.endswith('.jpg')]
         dataB.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
-
-        if index_slice:
-            dataA = dataA[index_slice]
-            dataB = dataB[index_slice]
 
         self.names = (dataA, dataB)
 
@@ -39,15 +36,17 @@ class Dataset(torch.utils.data.Dataset):
         dataA = plt.imread(os.path.join(self.data_dir_a, self.names[0][index])).squeeze()
         dataB = plt.imread(os.path.join(self.data_dir_b, self.names[1][index])).squeeze()
 
-        if self.data_type == 'float32':
-            dataA = dataA.astype(np.float32)
-            dataB = dataB.astype(np.float32)
+        if dataA.dtype == np.uint8:
+            dataA = dataA / 255.0
+
+        if dataB.dtype == np.uint8:
+            dataB = dataB / 255.0
 
         if len(dataA.shape) == 2:
-            dataA = np.expand_dims(dataA, axis=3)
+            dataA = np.expand_dims(dataA, axis=2)
             dataA = np.tile(dataA, (1, 1, 3))
         if len(dataB.shape) == 2:
-            dataB = np.expand_dims(dataB, axis=3)
+            dataB = np.expand_dims(dataB, axis=2)
             dataB = np.tile(dataB, (1, 1, 3))
 
         if self.direction == 'A2B':
@@ -93,8 +92,8 @@ class Nomalize(object):
         # return data
 
         dataA, dataB = data['dataA'], data['dataB']
-        dataA = 2 * (dataA / 255) - 1
-        dataB = 2 * (dataB / 255) - 1
+        dataA = 2 * dataA - 1
+        dataB = 2 * dataB - 1
         return {'dataA': dataA, 'dataB': dataB}
 
 
