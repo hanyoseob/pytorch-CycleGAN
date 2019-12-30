@@ -79,11 +79,6 @@ class ResNet(nn.Module):
         else:
             self.bias = True
 
-        # enc1 = []
-        # enc1 += [Padding(3, 'reflection')]
-        # enc1 += [CNR2d(self.nch_in, 1 * self.nch_ker, kernel_size=7, stride=1, padding=0, norm=self.norm, relu=0.0)]
-        # self.enc1 = nn.Sequential(*enc1)
-
         self.enc1 = CNR2d(self.nch_in,      1 * self.nch_ker, kernel_size=7, stride=1, padding=3, norm=self.norm, relu=0.0)
 
         self.enc2 = CNR2d(1 * self.nch_ker, 2 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=self.norm, relu=0.0)
@@ -101,11 +96,6 @@ class ResNet(nn.Module):
         self.dec3 = DECNR2d(4 * self.nch_ker, 2 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=self.norm, relu=0.0)
 
         self.dec2 = DECNR2d(2 * self.nch_ker, 1 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=self.norm, relu=0.0)
-
-        # dec1 = []
-        # dec1 += [Padding(3, 'reflection')]
-        # dec1 += [CNR2d(1 * self.nch_ker, self.nch_out, kernel_size=7, stride=1, padding=0, norm=[], relu=[], bias=False)]
-        # self.dec1 = nn.Sequential(*dec1)
 
         self.dec1 = CNR2d(1 * self.nch_ker, self.nch_out, kernel_size=7, stride=1, padding=3, norm=[], relu=[], bias=False)
 
@@ -139,10 +129,16 @@ class Discriminator(nn.Module):
         else:
             self.bias = True
 
-        self.dsc1 = CNR2d(1 * self.nch_in,  1 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=self.norm, relu=0.2)
+        # dsc1 : 256 x 256 x 3 -> 128 x 128 x 64
+        # dsc2 : 128 x 128 x 64 -> 64 x 64 x 128
+        # dsc3 : 64 x 64 x 128 -> 32 x 32 x 256
+        # dsc4 : 32 x 32 x 256 -> 32 x 32 x 512
+        # dsc5 : 32 x 32 x 512 -> 32 x 32 x 1
+
+        self.dsc1 = CNR2d(1 * self.nch_in,  1 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=[],        relu=0.2, bias=False)
         self.dsc2 = CNR2d(1 * self.nch_ker, 2 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=self.norm, relu=0.2)
         self.dsc3 = CNR2d(2 * self.nch_ker, 4 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=self.norm, relu=0.2)
-        self.dsc4 = CNR2d(4 * self.nch_ker, 8 * self.nch_ker, kernel_size=4, stride=1, padding=1, norm=self.norm, relu=0.2)
+        self.dsc4 = CNR2d(4 * self.nch_ker, 8 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=self.norm, relu=0.2)
         self.dsc5 = CNR2d(8 * self.nch_ker, 1,                kernel_size=4, stride=1, padding=1, norm=[],        relu=[], bias=False)
 
         # self.dsc1 = CNR2d(1 * self.nch_in,  1 * self.nch_ker, kernel_size=4, stride=2, padding=1, norm=[], relu=0.2)
