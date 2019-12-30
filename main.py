@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(description='Train the CycleGAN network',
 
 parser.add_argument('--gpu_ids', default='0', dest='gpu_ids')
 
-parser.add_argument('--mode', default='train', choices=['train', 'test'], dest='mode')
+parser.add_argument('--mode', default='test', choices=['train', 'test'], dest='mode')
 parser.add_argument('--train_continue', default='off', choices=['on', 'off'], dest='train_continue')
 
 parser.add_argument('--scope', default='cyclegan_inorm_resnet', dest='scope')
@@ -44,8 +44,8 @@ parser.add_argument('--lr_decay_iters', type=int, default=50, dest='lr_decay_ite
 
 parser.add_argument('--wgt_c_a', type=float, default=1e1, dest='wgt_c_a')
 parser.add_argument('--wgt_c_b', type=float, default=1e1, dest='wgt_c_b')
-parser.add_argument('--wgt_i', type=float, default=5e-1, dest='wgt_i')
-# parser.add_argument('--wgt_i', type=float, default=0e-1, dest='wgt_i')
+# parser.add_argument('--wgt_i', type=float, default=5e-1, dest='wgt_i')
+parser.add_argument('--wgt_i', type=float, default=0e-1, dest='wgt_i')
 
 parser.add_argument('--optim', default='adam', choices=['sgd', 'adam', 'rmsprop'], dest='optim')
 parser.add_argument('--beta1', default=0.5, dest='beta1')

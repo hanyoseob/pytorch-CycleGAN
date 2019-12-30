@@ -154,7 +154,7 @@ class Norm2d(nn.Module):
         if norm_mode == 'bnorm':
             self.norm = nn.BatchNorm2d(nch)
         elif norm_mode == 'inorm':
-            self.norm = nn.InstanceNorm2d(nch, affine=True, track_running_stats=True)
+            self.norm = nn.InstanceNorm2d(nch)
 
     def forward(self, x):
         return self.norm(x)
