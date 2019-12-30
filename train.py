@@ -61,6 +61,8 @@ class Train:
         self.direction = args.direction
         self.name_data = args.name_data
 
+        self.nblk = args.nblk
+
         if self.gpu_ids and torch.cuda.is_available():
             self.device = torch.device("cuda:%d" % self.gpu_ids[0])
             torch.cuda.set_device(self.gpu_ids[0])
@@ -76,7 +78,7 @@ class Train:
                     'optimG': optimG.state_dict(), 'optimD': optimD.state_dict()},
                    '%s/model_epoch%04d.pth' % (dir_chck, epoch))
 
-    def load(self, dir_chck, netG_a2b, netG_b2a, netD_a, netD_b, optimG, optimD, epoch, mode='train'):
+    def load(self, dir_chck, netG_a2b, netG_b2a, netD_a=[], netD_b=[], optimG=[], optimD=[], epoch=[], mode='train'):
         if not epoch:
             ckpt = os.listdir(dir_chck)
             ckpt.sort()
@@ -162,10 +164,10 @@ class Train:
         num_batch_train = int((num_train / batch_size) + ((num_train % batch_size) != 0))
 
         ## setup network
-        netG_a2b = UNet(nch_in, nch_out, nch_ker, norm)
-        netG_b2a = UNet(nch_in, nch_out, nch_ker, norm)
-        # netG_a2b = ResNet(nch_in, nch_out, nch_ker, norm)
-        # netG_b2a = ResNet(nch_in, nch_out, nch_ker, norm)
+        # netG_a2b = UNet(nch_in, nch_out, nch_ker, norm)
+        # netG_b2a = UNet(nch_in, nch_out, nch_ker, norm)
+        netG_a2b = ResNet(nch_in, nch_out, nch_ker, norm, nblk=self.nblk)
+        netG_b2a = ResNet(nch_in, nch_out, nch_ker, norm, nblk=self.nblk)
 
         netD_a = Discriminator(nch_in, nch_ker, norm)
         netD_b = Discriminator(nch_in, nch_ker, norm)
@@ -366,7 +368,7 @@ class Train:
         if not os.path.exists(dir_result_save):
             os.makedirs(dir_result_save)
 
-        dir_data_test = os.path.join(self.dir_data, 'test')
+        dir_data_test = os.path.join(self.dir_data, self.name_data, 'test')
 
         transform_test = transforms.Compose([Nomalize(), ToTensor()])
         transform_inv = transforms.Compose([ToNumpy(), Denomalize()])
@@ -380,19 +382,13 @@ class Train:
         num_batch_test = int((num_test / batch_size) + ((num_test % batch_size) != 0))
 
         ## setup network
-        netG_a2b = UNet(nch_in, nch_out, nch_ker, norm)
-        netG_b2a = UNet(nch_in, nch_out, nch_ker, norm)
-        # netG_a2b = ResNet(nch_in, nch_out, nch_ker, norm)
-        # netG_b2a = ResNet(nch_in, nch_out, nch_ker, norm)
-
-        netD_a = Discriminator(nch_in, nch_ker, norm)
-        netD_b = Discriminator(nch_in, nch_ker, norm)
+        # netG_a2b = UNet(nch_in, nch_out, nch_ker, norm)
+        # netG_b2a = UNet(nch_in, nch_out, nch_ker, norm)
+        netG_a2b = ResNet(nch_in, nch_out, nch_ker, norm, nblk=self.nblk)
+        netG_b2a = ResNet(nch_in, nch_out, nch_ker, norm, nblk=self.nblk)
 
         init_net(netG_a2b, init_type='normal', init_gain=0.02, gpu_ids=gpu_ids)
         init_net(netG_b2a, init_type='normal', init_gain=0.02, gpu_ids=gpu_ids)
-
-        init_net(netD_a, init_type='normal', init_gain=0.02, gpu_ids=gpu_ids)
-        init_net(netD_b, init_type='normal', init_gain=0.02, gpu_ids=gpu_ids)
 
         ## load from checkpoints
         st_epoch = 0
@@ -444,6 +440,7 @@ class Train:
 
                     append_index(dir_result, fileset)
 
+                    print("%d / %d" % (name + 1, num_test))
 
 
 def set_requires_grad(nets, requires_grad=False):
@@ -498,7 +495,7 @@ def append_index(dir_result, fileset, step=False):
         index.write("<html><body><table><tr>")
         if step:
             index.write("<th>step</th>")
-        index.write("<th>name</th><th>input_a</th><th>input_b</th><th>output_a</th><th>output_b</th><th>recon_a</th><th>recon_b</th></tr>")
+        index.write("<th>name</th><th>input_a</th><th>output_b</th><th>recon_a</th><th>input_b</th><th>output_a</th><th>recon_b</th></tr>")
 
     # for fileset in filesets:
     index.write("<tr>")
@@ -507,7 +504,7 @@ def append_index(dir_result, fileset, step=False):
         index.write("<td>%d</td>" % fileset["step"])
     index.write("<td>%s</td>" % fileset["name"])
 
-    for kind in ["input_a", "input_b", "output_a", "output_b", "recon_a", "recon_b"]:
+    for kind in ["input_a", "output_b", "recon_a", "input_b", "output_a", "recon_b"]:
         index.write("<td><img src='images/%s'></td>" % fileset[kind])
 
     index.write("</tr>")
