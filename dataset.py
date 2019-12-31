@@ -82,7 +82,7 @@ class ToTensor(object):
         return {'dataA': torch.from_numpy(dataA), 'dataB': torch.from_numpy(dataB)}
 
 
-class Nomalize(object):
+class Normalize(object):
     def __call__(self, data):
         # Nomalize [0, 1] => [-1, 1]
 
