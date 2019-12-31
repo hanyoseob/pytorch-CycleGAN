@@ -2,6 +2,7 @@ from model import *
 from dataset import *
 
 import itertools
+from statistics import mean
 
 import torch
 import torch.nn as nn
@@ -214,14 +215,14 @@ class Train:
             netD_a.train()
             netD_b.train()
 
-            loss_G_a2b_train = 0
-            loss_G_b2a_train = 0
-            loss_D_a_train = 0
-            loss_D_b_train = 0
-            loss_C_a_train = 0
-            loss_C_b_train = 0
-            loss_I_a_train = 0
-            loss_I_b_train = 0
+            loss_G_a2b_train = []
+            loss_G_b2a_train = []
+            loss_D_a_train = []
+            loss_D_b_train = []
+            loss_C_a_train = []
+            loss_C_b_train = []
+            loss_I_a_train = []
+            loss_I_b_train = []
 
             for i, data in enumerate(loader_train, 1):
                 def should(freq):
@@ -293,26 +294,26 @@ class Train:
                 optimG.step()
 
                 # get losses
-                loss_G_a2b_train += loss_G_a2b.item()
-                loss_G_b2a_train += loss_G_b2a.item()
+                loss_G_a2b_train += [loss_G_a2b.item()]
+                loss_G_b2a_train += [loss_G_b2a.item()]
 
-                loss_D_a_train += loss_D_a.item()
-                loss_D_b_train += loss_D_b.item()
+                loss_D_a_train += [loss_D_a.item()]
+                loss_D_b_train += [loss_D_b.item()]
 
-                loss_C_a_train += loss_C_a.item()
-                loss_C_b_train += loss_C_b.item()
+                loss_C_a_train += [loss_C_a.item()]
+                loss_C_b_train += [loss_C_b.item()]
 
                 if wgt_i > 0:
-                    loss_I_a_train += loss_I_a.item()
-                    loss_I_b_train += loss_I_b.item()
+                    loss_I_a_train += [loss_I_a.item()]
+                    loss_I_b_train += [loss_I_b.item()]
 
                 print('TRAIN: EPOCH %d: BATCH %04d/%04d: '
                       'G_a2b: %.4f G_b2a: %.4f D_a: %.4f D_b: %.4f C_a: %.4f C_b: %.4f I_a: %.4f I_b: %.4f'
                       % (epoch, i, num_batch_train,
-                         loss_G_a2b_train / i, loss_G_b2a_train / i,
-                         loss_D_a_train / i, loss_D_b_train / i,
-                         loss_C_a_train / i, loss_C_b_train / i,
-                         loss_I_a_train / i, loss_I_b_train / i))
+                         mean(loss_G_a2b_train), mean(loss_G_b2a_train),
+                         mean(loss_D_a_train), mean(loss_D_b_train),
+                         mean(loss_C_a_train), mean(loss_C_b_train),
+                         mean(loss_I_a_train), mean(loss_I_b_train)))
 
                 if should(num_freq_disp):
                     ## show output
@@ -326,14 +327,14 @@ class Train:
                     writer_train.add_images('input_b', input_b, num_batch_train * (epoch - 1) + i, dataformats='NHWC')
                     writer_train.add_images('output_b', output_b, num_batch_train * (epoch - 1) + i, dataformats='NHWC')
 
-            writer_train.add_scalar('loss_G_a2b', loss_G_a2b_train / num_batch_train, epoch)
-            writer_train.add_scalar('loss_G_b2a', loss_G_b2a_train / num_batch_train, epoch)
-            writer_train.add_scalar('loss_D_a', loss_D_a_train / num_batch_train, epoch)
-            writer_train.add_scalar('loss_D_b', loss_D_b_train / num_batch_train, epoch)
-            writer_train.add_scalar('loss_C_a', loss_C_a_train / num_batch_train, epoch)
-            writer_train.add_scalar('loss_C_b', loss_C_b_train / num_batch_train, epoch)
-            writer_train.add_scalar('loss_I_a', loss_I_a_train / num_batch_train, epoch)
-            writer_train.add_scalar('loss_I_b', loss_I_b_train / num_batch_train, epoch)
+            writer_train.add_scalar('loss_G_a2b', mean(loss_G_a2b_train), epoch)
+            writer_train.add_scalar('loss_G_b2a', mean(loss_G_b2a_train), epoch)
+            writer_train.add_scalar('loss_D_a', mean(loss_D_a_train), epoch)
+            writer_train.add_scalar('loss_D_b', mean(loss_D_b_train), epoch)
+            writer_train.add_scalar('loss_C_a', mean(loss_C_a_train), epoch)
+            writer_train.add_scalar('loss_C_b', mean(loss_C_b_train), epoch)
+            writer_train.add_scalar('loss_I_a', mean(loss_I_a_train), epoch)
+            writer_train.add_scalar('loss_I_b', mean(loss_I_b_train), epoch)
 
             # # update schduler
             # # schedG.step()
