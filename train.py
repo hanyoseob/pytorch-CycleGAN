@@ -364,7 +364,7 @@ class Train:
         ## setup dataset
         dir_chck = os.path.join(self.dir_checkpoint, self.scope, name_data)
 
-        dir_result = os.path.join(self.dir_result, self.scope)
+        dir_result = os.path.join(self.dir_result, self.scope, name_data)
         dir_result_save = os.path.join(dir_result, 'images')
         if not os.path.exists(dir_result_save):
             os.makedirs(dir_result_save)
@@ -422,7 +422,7 @@ class Train:
                 recon_a = transform_inv(recon_a)
                 recon_b = transform_inv(recon_b)
 
-                for j in range(batch_size):
+                for j in range(input_a.shape[0]):
                     name = batch_size * (i - 1) + j
                     fileset = {'name': name,
                                'input_a': "%04d-input_a.png" % name,
