@@ -155,7 +155,7 @@ class Discriminator(nn.Module):
         x = self.dsc4(x)
         x = self.dsc5(x)
 
-        x = torch.sigmoid(x)
+        # x = torch.sigmoid(x)
 
         return x
 

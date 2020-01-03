@@ -181,7 +181,7 @@ class Train:
 
         ## setup loss & optimization
         fn_Cycle = nn.L1Loss().to(device)   # L1
-        fn_GAN = nn.BCELoss().to(device)
+        fn_GAN = nn.BCEWithLogitsLoss().to(device)
         fn_Ident = nn.L1Loss().to(device)   # L1
 
         paramsG_a2b = netG_a2b.parameters()
