@@ -15,10 +15,10 @@ parser = argparse.ArgumentParser(description='Train the CycleGAN network',
 
 parser.add_argument('--gpu_ids', default='0', dest='gpu_ids')
 
-parser.add_argument('--mode', default='test', choices=['train', 'test'], dest='mode')
+parser.add_argument('--mode', default='train', choices=['train', 'test'], dest='mode')
 parser.add_argument('--train_continue', default='off', choices=['on', 'off'], dest='train_continue')
 
-parser.add_argument('--scope', default='cyclegan_inorm_resnet', dest='scope')
+parser.add_argument('--scope', default='cyclegan', dest='scope')
 parser.add_argument('--norm', type=str, default='inorm', dest='norm')
 parser.add_argument('--name_data', type=str, default='monet2photo', dest='name_data')
 
