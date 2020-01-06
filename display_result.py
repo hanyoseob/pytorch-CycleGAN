@@ -20,7 +20,8 @@ img = torch.zeros((n*(m-4), ny, nx, nch))
 
 for i in range(m-4):
     for j in range(n):
-        p = m_id[i + 2] + m*(j + n_id)
+        p = m_id[i + 0] + m * (j + n_id)
+        # p = m_id[i + 2] + m*(j + n_id)
         q = n*i + j
 
         img[q, :, :, :] = torch.from_numpy(plt.imread(os.path.join(dir_result, lst_result[p]))[:, :, :nch])
