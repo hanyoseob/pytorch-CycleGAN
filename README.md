@@ -24,7 +24,7 @@ Image-to-image translation is a class of vision and graphics problems where the 
 
 * Set **[scope name]** uniquely.
 * To understand hierarchy of directories based on their arguments, see **directories structure** below. 
-* Hyperparameters were written to **arg.txt** under the log directory.
+* Hyperparameters were written to **arg.txt** under the **[log directory]**.
 
 ## Test
     $ python main.py --mode test \
@@ -52,7 +52,7 @@ Image-to-image translation is a class of vision and graphics problems where the 
     $ tensorboard --logdir [log directory]/[scope name]/[data name] \
                   --port [(optional) 4 digit port number]
 ---
-    $ tensorboard --logdir ./log/cyclegan/monet2photo
+    $ tensorboard --logdir ./log/cyclegan/monet2photo \
                   --port 6006
                   
 After the above comment executes, go **http://localhost:6006**
@@ -99,10 +99,10 @@ After the above comment executes, go **http://localhost:6006**
     |       |   +---00000.png
     |       |   |   ...
     |       |   \---12345.png
-    |       +---trainB
-    |       |   +---00000.png
-    |       |   |   ...
-    |       |   \---12345.png
+    |       \---trainB
+    |           +---00000.png
+    |           |   ...
+    |           \---12345.png
     +---[dir_log]
     |   \---[scope]
     |       \---[name_data]
@@ -150,10 +150,10 @@ After the above comment executes, go **http://localhost:6006**
     |       |   +---00001.jpg
     |       |   |   ...
     |       |   \---01337.jpg
-    |       +---trainB
-    |       |   +---2013-11-08 16_45_24.jpg
-    |       |   |   ...
-    |       |   \---2017-01-03 09_45_13.jpg
+    |       \---trainB
+    |           +---2013-11-08 16_45_24.jpg
+    |           |   ...
+    |           \---2017-01-03 09_45_13.jpg
     +---log
     |   \---cyclegan
     |       \---monet2photo
