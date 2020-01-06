@@ -99,10 +99,10 @@ After the above comment executes, go **http://localhost:6006**
     |       |   +---00000.png
     |       |   |   ...
     |       |   \---12345.png
-    |       +---trainB
-    |       |   +---00000.png
-    |       |   |   ...
-    |       |   \---12345.png
+    |       \---trainB
+    |           +---00000.png
+    |           |   ...
+    |           \---12345.png
     +---[dir_log]
     |   \---[scope]
     |       \---[name_data]
@@ -150,10 +150,10 @@ After the above comment executes, go **http://localhost:6006**
     |       |   +---00001.jpg
     |       |   |   ...
     |       |   \---01337.jpg
-    |       +---trainB
-    |       |   +---2013-11-08 16_45_24.jpg
-    |       |   |   ...
-    |       |   \---2017-01-03 09_45_13.jpg
+    |       \---trainB
+    |           +---2013-11-08 16_45_24.jpg
+    |           |   ...
+    |           \---2017-01-03 09_45_13.jpg
     +---log
     |   \---cyclegan
     |       \---monet2photo
