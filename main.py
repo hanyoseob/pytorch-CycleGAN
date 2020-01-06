@@ -26,7 +26,7 @@ parser.add_argument('--dir_checkpoint', default='./checkpoints', dest='dir_check
 parser.add_argument('--dir_log', default='./log', dest='dir_log')
 
 parser.add_argument('--dir_data', default='../datasets', dest='dir_data')
-parser.add_argument('--dir_result', default='./result', dest='dir_result')
+parser.add_argument('--dir_result', default='./results', dest='dir_result')
 
 parser.add_argument('--num_epoch', type=int,  default=300, dest='num_epoch')
 parser.add_argument('--batch_size', type=int, default=4, dest='batch_size')
