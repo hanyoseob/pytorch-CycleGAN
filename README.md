@@ -52,7 +52,7 @@ Image-to-image translation is a class of vision and graphics problems where the 
     $ tensorboard --logdir [log directory]/[scope name]/[data name] \
                   --port [(optional) 4 digit port number]
 ---
-    $ tensorboard --logdir ./log/cyclegan/monet2photo
+    $ tensorboard --logdir ./log/cyclegan/monet2photo \
                   --port 6006
                   
 After the above comment executes, go **http://localhost:6006**
