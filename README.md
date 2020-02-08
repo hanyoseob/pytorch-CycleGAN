@@ -14,6 +14,7 @@ Image-to-image translation is a class of vision and graphics problems where the 
                      --dir_data [data directory] \
                      --dir_log [log directory] \
                      --dir_checkpoint [checkpoint directory]
+                     --gpu_ids [gpu id; '-1': no gpu, '0, 1, ..., N-1': gpus]
 ---
     $ python main.py --mode train \
                      --scope cyclegan \
@@ -21,6 +22,7 @@ Image-to-image translation is a class of vision and graphics problems where the 
                      --dir_data ./datasets \
                      --dir_log ./log \
                      --dir_checkpoint ./checkpoint
+                     --gpu_ids 0
 
 * Set **[scope name]** uniquely.
 * To understand hierarchy of directories based on their arguments, see **directories structure** below. 
@@ -34,6 +36,7 @@ Image-to-image translation is a class of vision and graphics problems where the 
                      --dir_log [log directory] \
                      --dir_checkpoint [checkpoint directory] \
                      --dir_result [result directory]
+                     --gpu_ids [gpu id; '-1': no gpu, '0, 1, ..., N-1': gpus]
 ---
     $ python main.py --mode test \
                      --scope cyclegan \
@@ -42,6 +45,7 @@ Image-to-image translation is a class of vision and graphics problems where the 
                      --dir_log ./log \
                      --dir_checkpoint ./checkpoints \
                      --dir_result ./results
+                     --gpu_ids 0
 
 * To test using trained network, set **[scope name]** defined in the **train** phase.
 * Generated images are saved in the **images** subfolder along with **[result directory]** folder.
