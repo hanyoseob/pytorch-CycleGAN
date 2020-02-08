@@ -48,8 +48,8 @@ Image-to-image translation is a class of vision and graphics problems where the 
                      --gpu_ids 0
 
 * To test using trained network, set **[scope name]** defined in the **train** phase.
-* Generated images are saved in the **images** subfolder along with **[result directory]** folder.
 * **index.html** is also generated to display the generated images.  
+* Generated images are saved in the **images** subfolder along with **[result directory]** folder.
 
 
 ## Tensorboard
